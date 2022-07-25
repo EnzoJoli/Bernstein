@@ -1,0 +1,27 @@
+# kind: PersistentVolume
+# apiVersion: v1
+# metadata:
+#   name: postgres-pv
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: postgres-pv
+#   capacity:
+#     storage: 10Gi
+#   accessModes:
+#     - ReadWriteOnce
+
+# ---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pvc
+  namespace: default
+spec:
+  storageClassName: postgres-pvc
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

@@ -1,0 +1,68 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: traefik-deployment
+#   namespace: kube-public
+#   labels:
+#     app: traefik
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: traefik
+#   template:
+#     metadata:
+#       labels:
+#         app: traefik
+#     spec:
+#       restartPolicy: Always
+#       containers:
+#       - name: traefik
+#         image: traefik:2.7
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-public
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: traefik-ingress-lb
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-ingress-lb
+        name: traefik-ingress-lb
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 60
+      restartPolicy: Always
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+              matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                    - epitech-s4ql
+                    - epitech-s4qe
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: traefik-ingress-lb
+        image: traefik:v2.7
+        ports:
+          - containerPort: 80
+            name: http
+          - containerPort: 8080
+            name: http
+        args:
+        - --api
+        - --kubernetes
+        - --logLevel=INFO
